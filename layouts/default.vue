@@ -72,15 +72,31 @@ const sDrawer = ref(true)
 </script>
 
 <template>
-  <v-navigation-drawer
-    v-model="sDrawer"
-    app
-    class="bg-grey-darken-4"
-  >
-    <v-list dense nav>
-      <template v-for="(item, i) in sidebarMenu" :key="i">
-        <SidebarNavItem :item="item" />
-      </template>
-    </v-list>
-  </v-navigation-drawer>
+  <v-app>
+    <v-navigation-drawer
+      v-model="sDrawer"
+      app
+      permanent
+      class="bg-grey-darken-4 text-white"
+    >
+      <div class="px-4 py-6 flex items-center">
+        <v-img
+          src="/image/main-logo-img.png"
+          alt="EGIS Logo"
+          contain
+          width="120"
+        />
+      </div>
+
+      <v-list dense nav>
+        <template v-for="(item, i) in sidebarMenu" :key="i">
+          <SidebarNavItem :item="item" />
+        </template>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-main>
+      <NuxtPage />
+    </v-main>
+  </v-app>
 </template>
