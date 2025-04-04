@@ -5,5 +5,6 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="text-h5">📄 여긴 /users 페이지입니다</div>
+  <div class="text-h5">DASHBOARD<br>
+    DIGITAL TWIN ADMIN</div>
 </template>

@@ -14,20 +14,38 @@ export default defineNuxtPlugin(nuxtApp => {
       aliases,
       sets: { mdi },
     },
+    ssr: true,
     theme: {
-      defaultTheme: 'adminDark',
+      defaultTheme: 'dark', // 기본 테마
       themes: {
-        adminDark: {
+        dark: {
           dark: true,
           colors: {
-            primary: '#2196F3',
-            background: '#1e1e1e',
-            surface: '#2A2A2A',
-            onPrimary: '#fff',
-          }
-        }
-      }
-    }
+            background: '#293740',
+            surface: '#303d4f',
+            primary: '#90caf9',
+            secondary: '#f48fb1',
+            error: '#ef5350',
+            success: '#66bb6a',
+            info: '#29b6f6',
+            warning: '#ffa726',
+          },
+        },
+        light: {
+          dark: false,
+          colors: {
+            background: '#eaf4ff',
+            surface: '#ffffff',
+            primary: '#1976d2',
+            secondary: '#e91e63',
+            error: '#f44336',
+            success: '#4caf50',
+            info: '#2196f3',
+            warning: '#ff9800',
+          },
+        },
+      },
+    },
   })
   nuxtApp.vueApp.use(vuetify)
 })
