@@ -11,12 +11,12 @@ export interface MenuItem {
     { title: '대시보드', icon: 'mdi-view-dashboard', to: '/dashboard' },
     {
       title: '사용자 관리', icon: 'mdi-account-multiple', children: [
-        { title: '사용자 관리', icon: 'mdi-chevron-right', to: '/users' },
-        { title: '협력사 관리', icon: 'mdi-chevron-right', to: '/partners' },
-        { title: '구독자 관리', icon: 'mdi-chevron-right', to: '/subscribers' },
-        { title: '그룹 관리', icon: 'mdi-chevron-right', to: '/groups' },
-        { title: '그룹 요청 관리', icon: 'mdi-chevron-right', to: '/group-requests' },
-        { title: '개발자 관리', icon: 'mdi-chevron-right', to: '/developers' },
+        { title: '사용자 관리', icon: 'mdi-chevron-right', to: '/users/users' },
+        { title: '협력사 관리', icon: 'mdi-chevron-right', to: '/users/partners' },
+        { title: '구독자 관리', icon: 'mdi-chevron-right', to: '/users/subscribers' },
+        { title: '그룹 관리', icon: 'mdi-chevron-right', to: '/users/groups' },
+        { title: '그룹 요청 관리', icon: 'mdi-chevron-right', to: '/users/group-requests' },
+        { title: '개발자 관리', icon: 'mdi-chevron-right', to: '/users/developers' },
       ]
     },
     { title: '분석 관리', icon: 'mdi-chart-bar', to: '/analytics' },
