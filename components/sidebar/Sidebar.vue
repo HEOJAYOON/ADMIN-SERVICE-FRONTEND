@@ -55,6 +55,7 @@ const sidebarWidth = ref(270) // 기본값
   flex-direction: column;
   height: 100%;
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
 }
 
 .sidebar-logo {

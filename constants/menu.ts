@@ -11,7 +11,7 @@ export interface MenuItem {
     { title: '대시보드', icon: 'mdi-view-dashboard', to: '/dashboard' },
     {
       title: '사용자 관리', icon: 'mdi-account-multiple', children: [
-        { title: '사용자 관리', icon: 'mdi-chevron-right', to: '/users/users' },
+        { title: '회원 관리', icon: 'mdi-chevron-right', to: '/users' },
         { title: '협력사 관리', icon: 'mdi-chevron-right', to: '/users/partners' },
         { title: '구독자 관리', icon: 'mdi-chevron-right', to: '/users/subscribers' },
         { title: '그룹 관리', icon: 'mdi-chevron-right', to: '/users/groups' },
