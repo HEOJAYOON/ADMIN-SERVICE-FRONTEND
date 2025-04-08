@@ -19,27 +19,22 @@
   <style scoped>
 .admin-page-header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  position: relative;
+  padding: 0 24px;
 }
 
 .left-section,
 .right-section {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  gap: 8px;
 }
 
 .center-section {
-  min-width: 300px;
-  position: absolute;
-  left: 45%;
-  transform: translateX(-45%);
   display: flex;
-  align-items: center;
-  margin-top: 20px;
+  justify-content: center;
+  width: 300px;
 }
-
-
   </style>
   
