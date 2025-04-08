@@ -1,6 +1,12 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
+  app:{
+    keepalive:true,
+    head: {
+      titleTemplate: "(ADMIN) DIGITAL TWIN CLOUD"
+    },
+  },
   modules: ['@nuxt/eslint', '@nuxt/icon', '@nuxt/ui'], // proxy 제거함
   css: [
     'vuetify/styles',

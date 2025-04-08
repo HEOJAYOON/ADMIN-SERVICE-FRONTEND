@@ -1,12 +1,7 @@
 <template>
   <ClientOnly>
     <header class="admin-header">
-      <div class="title-wrap">
-        <v-icon class="mr-2" color="primary">{{ icon }}</v-icon>
-        <h1 class="text-h6 font-weight-bold">{{ title }}</h1>
-      </div>
       <div class="right-section d-flex align-center gap-4">
-        <!-- 기존 컨트롤 버튼들 -->
         <v-btn icon variant="text" @click="toggleDark">
           <v-icon>{{ isDark ? 'mdi-weather-night' : 'mdi-white-balance-sunny' }}</v-icon>
         </v-btn>
@@ -84,21 +79,16 @@ console.log(title.value)
 
 <style scoped>
 .admin-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  margin: 10px;
-  z-index: 999;
+  justify-content: flex-end;
+  border-radius: 20px;
+  padding: 8px 0px;
+  margin: -8px 0px 8px 0px;
 }
 
-
 .right-section {
+  pointer-events: auto;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -106,7 +96,6 @@ console.log(title.value)
   border-radius: 20px;
   padding: 8px 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s ease;
 }
 
 .user-id-button {

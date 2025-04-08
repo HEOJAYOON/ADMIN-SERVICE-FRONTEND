@@ -8,7 +8,7 @@ export interface MenuItem {
   }
   
   export const sidebarItems: MenuItem[] = [
-    { title: '대시보드', icon: 'mdi-view-dashboard', to: '/dashboard' },
+    { title: '대시보드', icon: 'mdi-view-dashboard', to: '/' },
     {
       title: '사용자 관리', icon: 'mdi-account-multiple', children: [
         { title: '회원 관리', icon: 'mdi-chevron-right', to: '/users' },

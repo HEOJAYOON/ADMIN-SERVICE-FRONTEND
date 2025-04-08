@@ -1,10 +1,10 @@
-<!-- pages/index.vue -->
-<script setup lang="ts">
+<script setup>
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 </script>
 
 <template>
-  <h1 style="text-align: center; margin-top: 40px;">관리자 홈</h1>
+  <div class="text-h5">DASHBOARD<br>
+    DIGITAL TWIN ADMIN</div>
 </template>
