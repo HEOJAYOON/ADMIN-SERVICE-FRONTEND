@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
 import { debouncedRef  } from '@vueuse/core'
 import AdminPageHeader from '@/components/header/AdminPageHeader.vue'
+import { useFetch } from '#app'
 
 definePageMeta({
   layout: 'admin',
@@ -48,22 +49,48 @@ const { data, pending } = useFetch<ApiResponse>('/api/users', {
 const users = computed(() => data.value?.items ?? [])
 const total = computed(() => data.value?.total ?? 0)
 
-const headers: Header[] = [
-  { title: '회원명', key: 'name', width: '10%'},
-  { title: 'ID', key: 'id', width: '10%'},
-  { title: '레벨', key: 'level', width: '5%'},
-  { title: '협력사', key: 'partner', width: '10%'},
-  { title: '가입일', key: 'joinedAt', width: '10%'},
-  { title: '최근 로그인', key: 'lastLogin', width: '10%'},
-  { title: '상태', key: 'status', width: '5%'},
-  { title: '사용량 (MB)', key: 'usage', width: '7%'},
-  { title: '정보변경', key: 'actions', sortable: false, width: '5%' },
-]
+const showDialog = ref(false)
+const formRef = ref()
+const userForm = ref({
+  username: '',
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+})
 
-
-function onAddUser() {
-  console.log('신규 등록 버튼 클릭됨!')
+const rules = {
+  required: (v: string) => !!v || '필수 입력입니다.',
+  email: (v: string) => /.+@.+\..+/.test(v) || '올바른 이메일 형식이어야 합니다.',
+  passwordMatch: () => userForm.value.password === userForm.value.confirmPassword || '비밀번호가 일치하지 않습니다.',
 }
+
+function submitForm() {
+  formRef.value?.validate().then(async (isValid: boolean) => {
+    if (isValid) {
+      // *추후 API 연동 *
+      // const res = await $fetch('/api/users', {
+      //   method: 'POST',
+      //   body: userForm.value,
+      // })
+      console.log('등록 완료:', res)
+      showDialog.value = false
+    }
+  })
+}
+
+
+const headers: Header[] = [
+  { title: '회원명', key: 'name', align: 'center', width: '10%'},
+  { title: 'ID', key: 'id', align: 'center',width: '10%'},
+  { title: '레벨', key: 'level', align: 'center',width: '5%'},
+  { title: '협력사', key: 'partner', align: 'center',width: '10%'},
+  { title: '가입일', key: 'joinedAt', align: 'center',width: '10%'},
+  { title: '최근 로그인', key: 'lastLogin', align: 'center',width: '10%'},
+  { title: '상태', key: 'status', align: 'center',width: '5%'},
+  { title: '사용량 (MB)', key: 'usage',align: 'center', width: '7%'},
+  { title: '', key: 'actions', sortable: false, width: '3%' },
+]
 
 </script>
 
@@ -86,12 +113,12 @@ function onAddUser() {
                 variant="tonal"
                 size="30px"
                 class="ml-2"
-                @click="onAddUser"
+                @click="showDialog = true"
               >
                 <v-icon>mdi-plus</v-icon>
               </v-btn>
             </template>
-            회원 등록
+            회원 추가
           </v-tooltip>
         </template>
         <template #center>
@@ -119,20 +146,32 @@ function onAddUser() {
             hide-default-footer
             :height="750"
           >
-          <template #header="{ props }">
+            <!-- 헤더 -->
+            <template #header="{ props }">
               <tr>
                 <th
                   v-for="header in headers"
                   :key="header.key"
-                  :style="{ width: header.width }"
+                  :style="{ width: header.width } "
                 >
                   {{ header.title }}
                 </th>
               </tr>
             </template>
+
+            <!-- 회원명 -->
+            <template #item.name="{ item }">
+              {{ item.name }}
+            </template>
+
+            <!-- ID -->
+            <template #item.id="{ item }">
+              {{ item.id }}
+            </template>
+
+            <!-- 레벨 -->
             <template #item.level="{ item }">
               <v-chip
-                v-if="item"
                 :color="item.level === '관리자' ? 'red' : item.level === '미승인' ? 'grey' : 'blue'"
                 dark
                 small
@@ -140,9 +179,25 @@ function onAddUser() {
                 {{ item.level }}
               </v-chip>
             </template>
+
+            <!-- 협력사 -->
+            <template #item.partner="{ item }">
+              {{ item.partner }}
+            </template>
+
+            <!-- 가입일 -->
+            <template #item.joinedAt="{ item }">
+              {{ dayjs(item.joinedAt).format('YYYY-MM-DD') }}
+            </template>
+
+            <!-- 최근 로그인 -->
+            <template #item.lastLogin="{ item }">
+              {{ dayjs(item.lastLogin).format('YYYY-MM-DD HH:mm') }}
+            </template>
+
+            <!-- 상태 -->
             <template #item.status="{ item }">
               <v-chip
-                v-if="item"
                 :color="item.status === '정상' ? 'green' : 'orange'"
                 dark
                 small
@@ -150,23 +205,22 @@ function onAddUser() {
                 {{ item.status }}
               </v-chip>
             </template>
-            <template #item.joinedAt="{ item }">
-              <span v-if="item">
-                {{ dayjs(item.joinedAt).format('YYYY-MM-DD') }}
-              </span>
+
+            <!-- 사용량 -->
+            <template #item.usage="{ item }">
+              {{ item.usage }}
             </template>
-            <template #item.lastLogin="{ item }">
-              <span v-if="item">
-                {{ dayjs(item.lastLogin).format('YYYY-MM-DD HH:mm') }}
-              </span>
-            </template>
+
+            <!-- 정보변경 (연필 아이콘) -->
             <template #item.actions="{ item }">
-              <v-btn icon size="small" variant="text" color="primary" @click="onEdit(item)">
+              <v-btn icon size="small" variant="text" class="edit-icon" @click="onEdit(item)">
                 <v-icon>mdi-pencil-outline</v-icon>
               </v-btn>
             </template>
           </v-data-table>
         </div>
+
+
         <!-- 커스텀 푸터 -->
         <v-row class="pa-2" align="center" justify="space-between">
           <div>
@@ -184,6 +238,51 @@ function onAddUser() {
           ></v-pagination>
         </v-row>
     </div>
+    <v-dialog v-model="showDialog" max-width="500px">
+  <v-card>
+    <v-card-title class="text-h6 font-weight-bold">회원 등록</v-card-title>
+    <v-card-text>
+      <v-form ref="formRef">
+        <v-text-field
+          v-model="userForm.username"
+          label="아이디"
+          :rules="[rules.required]"
+          required
+        />
+        <v-text-field
+          v-model="userForm.name"
+          label="이름"
+          :rules="[rules.required]"
+          required
+        />
+        <v-text-field
+          v-model="userForm.email"
+          label="이메일"
+          :rules="[rules.required, rules.email]"
+          required
+        />
+        <v-text-field
+          v-model="userForm.password"
+          label="비밀번호"
+          type="password"
+          :rules="[rules.required]"
+          required
+        />
+        <v-text-field
+          v-model="userForm.confirmPassword"
+          label="비밀번호 확인"
+          type="password"
+          :rules="[rules.required, rules.passwordMatch]"
+          required
+        />
+      </v-form>
+    </v-card-text>
+    <v-card-actions class="justify-end">
+      <v-btn text @click="showDialog = false">취소</v-btn>
+      <v-btn color="primary" @click="submitForm">등록</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>    
   </ClientOnly>
 </template>
 
@@ -210,7 +309,7 @@ function onAddUser() {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Vuetify 테이블 스크롤 및 헤더 고정 */
+/* 테이블 내부 고정 및 스크롤 */
 .fixed-table ::v-deep .v-data-table__wrapper {
   max-height: 100%;
 }
@@ -233,20 +332,26 @@ function onAddUser() {
   z-index: 2;
 }
 
-::v-deep(.custom-tooltip .v-overlay__content) {
-  background-color: #2c2c2c !important; /* ✅ 원하는 색으로 바꿔 */
-  color: #fff;
-  font-size: 13px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  white-space: nowrap;
+
+.v-data-table thead th .v-data-table-header__icon {
+  margin-left: 10px; /* 👈 이걸로 조절해줘. 4~8px 사이 추천 */
 }
+
+/* 연필 아이콘 hover 효과 */
+.edit-icon .v-icon {
+  color: #888;
+  transition: color 0.2s ease;
+}
+.edit-icon:hover .v-icon {
+  color: #1976d2;
+}
+
 .search-summary strong {
   color: #42a5f5;
 }
 </style>
 
+<!-- 🔥 글로벌 스타일은 여기 하나면 끝 -->
 <style>
 .custom-tooltip .v-overlay__content {
   background-color: #2c2c2c !important;
