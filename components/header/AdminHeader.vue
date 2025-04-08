@@ -71,8 +71,6 @@ const goTo = (path: string) => {
 const logout = () => {
   alert('로그아웃!')
 }
-
-console.log(title.value)
 </script>
 
   

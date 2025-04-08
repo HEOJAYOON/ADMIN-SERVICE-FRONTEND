@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watchEffect } from 'vue'
+import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
+import { debouncedRef  } from '@vueuse/core'
 import AdminPageHeader from '@/components/header/AdminPageHeader.vue'
 
 definePageMeta({
@@ -31,14 +32,17 @@ interface Header {
 }
 
 const page = ref(1)
-const itemsPerPage = ref(25)
+const itemsPerPage = ref(30)
+const search = ref('')
+const debouncedSearch = debouncedRef (search, 300)
 
 const { data, pending } = useFetch<ApiResponse>('/api/users', {
   query: {
     page,
     limit: itemsPerPage,
+    search: debouncedSearch,
   },
-  watch: [page, itemsPerPage],
+  watch: [page, itemsPerPage, debouncedSearch],
 })
 
 const users = computed(() => data.value?.items ?? [])
@@ -56,15 +60,11 @@ const headers: Header[] = [
   { title: '정보변경', key: 'actions', sortable: false, width: '5%' },
 ]
 
-watchEffect(() => {
-  console.log('총 유저 수:', total.value)
-})
-
-const search = ref('')
 
 function onAddUser() {
   console.log('신규 등록 버튼 클릭됨!')
 }
+
 </script>
 
 <template>
@@ -74,16 +74,25 @@ function onAddUser() {
         <template #left>
           <v-icon class="mr-2" color="primary">mdi-account</v-icon>
           <h1 class="page-title">회원 관리</h1>
-          <v-btn
-            class="reveal-button"
-            @click="onAddUser"
-            color="primary"
-            elevation="1"
-            variant="flat"
+          <v-tooltip
+            location="right"
+            offset="10"
+            class="custom-tooltip"
           >
-            <v-icon start>mdi-plus</v-icon>
-            <span class="btn-label">회원 등록</span>
-          </v-btn>
+            <template #activator="{ props }">
+              <v-btn
+                icon
+                v-bind="props"
+                variant="tonal"
+                size="30px"
+                class="ml-2"
+                @click="onAddUser"
+              >
+                <v-icon>mdi-plus</v-icon>
+              </v-btn>
+            </template>
+            회원 등록
+          </v-tooltip>
         </template>
         <template #center>
           <v-text-field
@@ -100,17 +109,15 @@ function onAddUser() {
         <!-- 기본 푸터 숨김 -->
         <div class="table-scroll-area">
           <v-data-table
-            :key="`${page}-${itemsPerPage}`"
-            v-model:page="page"
-            v-model:items-per-page="itemsPerPage"
-            :headers="headers"
             :items="users"
+            :headers="headers"
+            :items-per-page="users.length"
+            :page="1"
             :loading="pending"
-            :server-items-length="total"
-            :height="750"
-            hide-default-footer
             class="elevation-1 fixed-table"
             style="table-layout: fixed;"
+            hide-default-footer
+            :height="750"
           >
           <template #header="{ props }">
               <tr>
@@ -163,7 +170,12 @@ function onAddUser() {
         <!-- 커스텀 푸터 -->
         <v-row class="pa-2" align="center" justify="space-between">
           <div>
-            총 {{ total }} 명의 회원 정보가 있습니다.
+            <template v-if="search && search.trim()">
+              <strong>'{{ search }}'</strong> 검색결과 <strong>{{ total }}</strong> 명이 일치합니다.
+            </template>
+            <template v-else>
+              총 <strong>{{ total }}</strong>명의 회원이 등록되어 있습니다.
+            </template>
           </div>
           <v-pagination
             v-model="page"
@@ -176,7 +188,6 @@ function onAddUser() {
 </template>
 
 <style scoped>
-
 .page-title {
   font-size: 22px;
   font-weight: bold;
@@ -199,6 +210,7 @@ function onAddUser() {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+/* Vuetify 테이블 스크롤 및 헤더 고정 */
 .fixed-table ::v-deep .v-data-table__wrapper {
   max-height: 100%;
 }
@@ -206,12 +218,10 @@ function onAddUser() {
 ::v-deep(.v-table__wrapper)::-webkit-scrollbar {
   width: 4px;
 }
-
 ::v-deep(.v-table__wrapper)::-webkit-scrollbar-thumb {
   background-color: #666;
   border-radius: 4px;
 }
-
 ::v-deep(.v-data-table__wrapper)::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -219,46 +229,30 @@ function onAddUser() {
 .fixed-table ::v-deep thead {
   position: sticky;
   top: 0;
-  background-color:#2b2b2b;
+  background-color: #2b2b2b;
   z-index: 2;
 }
 
-.reveal-button {
-  display: inline-flex;
-  align-items: center;
-  height: 30px;
-  width: 30px;
-  padding: 0;
-  border-radius: 999px;
-  overflow: hidden;
+::v-deep(.custom-tooltip .v-overlay__content) {
+  background-color: #2c2c2c !important; /* ✅ 원하는 색으로 바꿔 */
+  color: #fff;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   white-space: nowrap;
-  transition: all 0.3s ease;
-  min-width: 30px;
-  position: relative;
-  margin-left: 10px;
 }
+.search-summary strong {
+  color: #42a5f5;
+}
+</style>
 
-.reveal-button .v-icon {
-  transition: margin 0.3s ease;
-  margin-left: 8px;
-  z-index: 2;
-}
-
-.reveal-button .btn-label {
-  opacity: 0;
-  margin-left: 0;
-  max-width: 0;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  z-index: 1;
-}
-.reveal-button:hover {
-  width: 110px;
-  justify-content: flex-start;
-}
-
-.reveal-button:hover .btn-label {
-  opacity: 1;
-  max-width: 100px;
+<style>
+.custom-tooltip .v-overlay__content {
+  background-color: #2c2c2c !important;
+  color: white;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 6px;
 }
 </style>
