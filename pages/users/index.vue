@@ -80,6 +80,46 @@ function submitForm() {
 }
 
 
+// 회원추가 다이얼로그
+
+const editDialog = ref(false)
+
+const editForm = ref({
+  username: 'user123',
+  name: '홍길동',
+  email: 'gildong@example.com',
+  partner: '협력사1',
+  level: '승인회원',
+  status: '정상',
+  loginCount: 87,
+  joinedAt: '2023-12-01',
+  lastLogin: '2024-04-08 12:34',
+  apps: ['문서함', '파일공유', '메시지']
+})
+
+function openEditDialog(item: User) {
+  editForm.value = {
+    username: item.id,
+    name: item.name,
+    email: item.email || '',
+    partner: item.partner || '',
+    level: item.level || '',
+    status: item.status || '',
+    loginCount: item.loginCount || 0,
+    joinedAt: dayjs(item.joinedAt).format('YYYY-MM-DD'),
+    lastLogin: dayjs(item.lastLogin).format('YYYY-MM-DD HH:mm'),
+    apps: item.apps || []
+  }
+  editDialog.value = true
+}
+
+
+function submitEdit() {
+  // TODO: API 연동
+  console.log('보낼 데이터:', editForm.value)
+}
+
+
 const headers: Header[] = [
   { title: '회원명', key: 'name', align: 'center', width: '10%'},
   { title: 'ID', key: 'id', align: 'center',width: '10%'},
@@ -213,7 +253,13 @@ const headers: Header[] = [
 
             <!-- 정보변경 (연필 아이콘) -->
             <template #item.actions="{ item }">
-              <v-btn icon size="small" variant="text" class="edit-icon" @click="onEdit(item)">
+              <v-btn
+                icon
+                size="small"
+                variant="text"
+                class="edit-icon"
+                @click="openEditDialog(item)"
+              >
                 <v-icon>mdi-pencil-outline</v-icon>
               </v-btn>
             </template>
@@ -238,6 +284,9 @@ const headers: Header[] = [
           ></v-pagination>
         </v-row>
     </div>
+
+
+    <!-- 회원추가 다이얼로그 -->
     <v-dialog v-model="showDialog" max-width="600px" class="rounded-dialog">
       <v-card>
         <v-card-title class="text-h6 font-weight-bold">
@@ -287,7 +336,70 @@ const headers: Header[] = [
           <v-btn color="primary" @click="submitForm">등록</v-btn>
         </v-card-actions>
       </v-card>
-    </v-dialog>    
+    </v-dialog>
+
+    <!-- 회원 정보 수정 다이얼로그 -->
+    <v-dialog v-model="editDialog" max-width="700px" class="rounded-dialog">
+      <v-card>
+        <v-card-title class="text-h6 font-weight-bold">
+          <v-icon class="mr-2" color="primary">mdi-account-edit</v-icon>
+          회원 정보 수정
+        </v-card-title>
+
+        <v-card-text>
+          <v-form ref="editFormRef">
+            <!-- 텍스트 (읽기 전용) -->
+            <v-text-field v-model="editForm.username" label="회원 아이디" readonly />
+            <v-text-field v-model="editForm.loginCount" label="로그인 수" readonly />
+            <v-text-field v-model="editForm.joinedAt" label="회원 가입일" readonly />
+            <v-text-field v-model="editForm.lastLogin" label="마지막 로그인" readonly />
+
+            <!-- 수정 가능 -->
+            <v-text-field v-model="editForm.name" label="회원명" :rules="[rules.required]" />
+            <v-text-field v-model="editForm.email" label="이메일" :rules="[rules.required, rules.email]" />
+            <v-text-field v-model="editForm.partner" label="협력사" />
+
+            <!-- 드롭다운: 레벨 -->
+            <v-select
+              v-model="editForm.level"
+              label="회원 레벨"
+              :items="['사이트관리자', '미승인', '승인회원', '그룹관리자']"
+            />
+
+            <!-- 드롭다운: 상태 -->
+            <v-select
+              v-model="editForm.status"
+              label="회원 상태"
+              :items="['정상', '이용정지', '회원탈퇴']"
+            />
+
+            <!-- 사용 중인 앱 -->
+            <div class="mt-4">
+              <label class="text-subtitle-2 font-weight-medium mb-1">사용 중인 앱</label>
+              <div class="app-list">
+                <v-chip
+                  v-for="app in editForm.apps"
+                  :key="app"
+                  class="ma-1"
+                  color="primary"
+                  text-color="white"
+                  small
+                >
+                  {{ app }}
+                </v-chip>
+              </div>
+            </div>
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions class="justify-end">
+          <v-btn text @click="editDialog = false">취소</v-btn>
+          <v-btn color="primary" @click="submitEdit">저장</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+
   </ClientOnly>
 </template>
 
@@ -362,7 +474,10 @@ const headers: Header[] = [
   color: #aaa;
   text-align: center;
 }
-
+.app-list {
+  display: flex;
+  flex-wrap: wrap;
+}
 </style>
 
 <!-- 🔥 글로벌 스타일은 여기 하나면 끝 -->
