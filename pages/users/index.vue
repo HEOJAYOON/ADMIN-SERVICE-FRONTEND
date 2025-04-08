@@ -238,51 +238,56 @@ const headers: Header[] = [
           ></v-pagination>
         </v-row>
     </div>
-    <v-dialog v-model="showDialog" max-width="500px">
-  <v-card>
-    <v-card-title class="text-h6 font-weight-bold">회원 등록</v-card-title>
-    <v-card-text>
-      <v-form ref="formRef">
-        <v-text-field
-          v-model="userForm.username"
-          label="아이디"
-          :rules="[rules.required]"
-          required
-        />
-        <v-text-field
-          v-model="userForm.name"
-          label="이름"
-          :rules="[rules.required]"
-          required
-        />
-        <v-text-field
-          v-model="userForm.email"
-          label="이메일"
-          :rules="[rules.required, rules.email]"
-          required
-        />
-        <v-text-field
-          v-model="userForm.password"
-          label="비밀번호"
-          type="password"
-          :rules="[rules.required]"
-          required
-        />
-        <v-text-field
-          v-model="userForm.confirmPassword"
-          label="비밀번호 확인"
-          type="password"
-          :rules="[rules.required, rules.passwordMatch]"
-          required
-        />
-      </v-form>
-    </v-card-text>
-    <v-card-actions class="justify-end">
-      <v-btn text @click="showDialog = false">취소</v-btn>
-      <v-btn color="primary" @click="submitForm">등록</v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>    
+    <v-dialog v-model="showDialog" max-width="600px" class="rounded-dialog">
+      <v-card>
+        <v-card-title class="text-h6 font-weight-bold">
+          <v-icon class="mr-2" color="primary">mdi-account-plus</v-icon>
+          회원 등록</v-card-title>
+        <v-card-text>
+          <v-form ref="formRef">
+            <v-text-field
+              v-model="userForm.username"
+              label="아이디"
+              :rules="[rules.required]"
+              required
+            />
+            <v-text-field
+              v-model="userForm.name"
+              label="이름"
+              :rules="[rules.required]"
+              required
+            />
+            <v-text-field
+              v-model="userForm.email"
+              label="이메일"
+              :rules="[rules.required, rules.email]"
+              required
+            />
+            <v-text-field
+              v-model="userForm.password"
+              label="비밀번호"
+              type="password"
+              :rules="[rules.required]"
+              required
+            />
+            <div class="hint-message">
+              ⚠ 비밀번호는 <strong>숫자, 영문, 특수문자를 각각 포함 9자리 이상</strong>
+            </div>   
+            <v-text-field
+              v-model="userForm.confirmPassword"
+              label="비밀번호 확인"
+              type="password"
+              :rules="[rules.required, rules.passwordMatch]"
+              required
+            />
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn text @click="showDialog = false">취소</v-btn>
+          <v-btn color="primary" @click="submitForm">등록</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>    
   </ClientOnly>
 </template>
 
@@ -349,6 +354,15 @@ const headers: Header[] = [
 .search-summary strong {
   color: #42a5f5;
 }
+
+.hint-message {
+  font-size: 12px;
+  margin-top: -12px;
+  margin-bottom: 8px;
+  color: #aaa;
+  text-align: center;
+}
+
 </style>
 
 <!-- 🔥 글로벌 스타일은 여기 하나면 끝 -->
@@ -359,5 +373,9 @@ const headers: Header[] = [
   font-size: 13px;
   padding: 6px 12px;
   border-radius: 6px;
+}
+.rounded-dialog .v-overlay__content {
+  border-radius: 20px !important;
+  overflow: hidden;
 }
 </style>
