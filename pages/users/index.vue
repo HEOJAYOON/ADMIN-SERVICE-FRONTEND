@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import { debouncedRef } from '@vueuse/core'
 
 import { useFetch } from '#app'
-import type { VDataTableHeader } from 'vuetify'
+import type { DataTableHeader } from 'vuetify'
 
 import AdminPageHeader from '@/components/header/AdminPageHeader.vue'
 
@@ -134,7 +134,7 @@ function submitEdit() {
 // 테이블 헤더 정의
 // ------------------------
 
-const headers: VDataTableHeader[] = [
+const headers: DataTableHeader[] = [
   { title: '회원명', key: 'name', align: 'center', width: '10%' },
   { title: 'ID', key: 'id', align: 'center', width: '10%' },
   { title: '레벨', key: 'level', align: 'center', width: '5%' },
@@ -215,16 +215,19 @@ const headers: VDataTableHeader[] = [
             </template>
 
             <!-- 회원명 -->
+            <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template #item.name="{ item }">
               {{ item.name }}
             </template>
 
             <!-- ID -->
+            <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template #item.id="{ item }">
               {{ item.id }}
             </template>
 
             <!-- 레벨 -->
+            <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template #item.level="{ item }">
               <v-chip
                 :color="item.level === '관리자' ? 'red' : item.level === '미승인' ? 'grey' : 'blue'"
@@ -236,21 +239,25 @@ const headers: VDataTableHeader[] = [
             </template>
 
             <!-- 협력사 -->
+            <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template #item.partner="{ item }">
               {{ item.partner }}
             </template>
 
             <!-- 가입일 -->
+            <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template #item.joinedAt="{ item }">
               {{ dayjs(item.joinedAt).format('YYYY-MM-DD') }}
             </template>
 
             <!-- 최근 로그인 -->
+            <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template #item.lastLogin="{ item }">
               {{ dayjs(item.lastLogin).format('YYYY-MM-DD HH:mm') }}
             </template>
 
             <!-- 상태 -->
+            <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template #item.status="{ item }">
               <v-chip
                 :color="item.status === '정상' ? 'green' : 'orange'"
@@ -262,11 +269,13 @@ const headers: VDataTableHeader[] = [
             </template>
 
             <!-- 사용량 -->
+            <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template #item.usage="{ item }">
               {{ item.usage }}
             </template>
 
             <!-- 정보변경 (연필 아이콘) -->
+            <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template #item.actions="{ item }">
               <v-btn
                 icon
@@ -294,9 +303,8 @@ const headers: VDataTableHeader[] = [
           </div>
           <v-pagination
             v-model="page"
-            :length="Math.ceil(total / itemsPerPage)"
-            total-visible="7"
-          ></v-pagination>
+            :length="10"
+          />
         </v-row>
     </div>
 
