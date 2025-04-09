@@ -1,15 +1,26 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+
 import dayjs from 'dayjs'
-import { debouncedRef  } from '@vueuse/core'
-import AdminPageHeader from '@/components/header/AdminPageHeader.vue'
+import { debouncedRef } from '@vueuse/core'
+
 import { useFetch } from '#app'
+import type { VDataTableHeader } from 'vuetify'
+
+import AdminPageHeader from '@/components/header/AdminPageHeader.vue'
+
+const route = useRoute()
 
 definePageMeta({
   layout: 'admin',
   title: '회원 관리',
   icon: 'mdi-account-outline',
 })
+
+// ------------------------
+// 인터페이스
+// ------------------------
 
 interface User {
   name: string
@@ -20,22 +31,24 @@ interface User {
   lastLogin: string
   status: string
   usage: number
+  email: string
+  loginCount: number
+  apps: string[]
 }
 
 interface ApiResponse {
   items: User[]
   total: number
 }
-interface Header {
-  title: string
-  key: string
-  width?: string
-}
+
+// ------------------------
+// 상태
+// ------------------------
 
 const page = ref(1)
 const itemsPerPage = ref(30)
 const search = ref('')
-const debouncedSearch = debouncedRef (search, 300)
+const debouncedSearch = debouncedRef(search, 300)
 
 const { data, pending } = useFetch<ApiResponse>('/api/users', {
   query: {
@@ -46,8 +59,12 @@ const { data, pending } = useFetch<ApiResponse>('/api/users', {
   watch: [page, itemsPerPage, debouncedSearch],
 })
 
-const users = computed(() => data.value?.items ?? [])
+const users = computed<User[]>(() => data.value?.items ?? [])
 const total = computed(() => data.value?.total ?? 0)
+
+// ------------------------
+// 회원 추가 폼
+// ------------------------
 
 const showDialog = ref(false)
 const formRef = ref()
@@ -68,71 +85,69 @@ const rules = {
 function submitForm() {
   formRef.value?.validate().then(async (isValid: boolean) => {
     if (isValid) {
-      // *추후 API 연동 *
-      // const res = await $fetch('/api/users', {
-      //   method: 'POST',
-      //   body: userForm.value,
-      // })
-      console.log('등록 완료:', res)
+      console.log('등록 완료:', userForm.value)
       showDialog.value = false
     }
   })
 }
 
-
-// 회원추가 다이얼로그
+// ------------------------
+// 회원 수정 다이얼로그
+// ------------------------
 
 const editDialog = ref(false)
 
 const editForm = ref({
-  username: 'user123',
-  name: '홍길동',
-  email: 'gildong@example.com',
-  partner: '협력사1',
-  level: '승인회원',
-  status: '정상',
-  loginCount: 87,
-  joinedAt: '2023-12-01',
-  lastLogin: '2024-04-08 12:34',
-  apps: ['문서함', '파일공유', '메시지']
+  username: '',
+  name: '',
+  email: '',
+  partner: '',
+  level: '',
+  status: '',
+  loginCount: 0,
+  joinedAt: '',
+  lastLogin: '',
+  apps: [] as string[]
 })
 
 function openEditDialog(item: User) {
   editForm.value = {
     username: item.id,
     name: item.name,
-    email: item.email || '',
-    partner: item.partner || '',
-    level: item.level || '',
-    status: item.status || '',
-    loginCount: item.loginCount || 0,
+    email: item.email,
+    partner: item.partner,
+    level: item.level,
+    status: item.status,
+    loginCount: item.loginCount,
     joinedAt: dayjs(item.joinedAt).format('YYYY-MM-DD'),
     lastLogin: dayjs(item.lastLogin).format('YYYY-MM-DD HH:mm'),
-    apps: item.apps || []
+    apps: item.apps
   }
   editDialog.value = true
 }
 
-
 function submitEdit() {
-  // TODO: API 연동
   console.log('보낼 데이터:', editForm.value)
 }
 
+// ------------------------
+// 테이블 헤더 정의
+// ------------------------
 
-const headers: Header[] = [
-  { title: '회원명', key: 'name', align: 'center', width: '10%'},
-  { title: 'ID', key: 'id', align: 'center',width: '10%'},
-  { title: '레벨', key: 'level', align: 'center',width: '5%'},
-  { title: '협력사', key: 'partner', align: 'center',width: '10%'},
-  { title: '가입일', key: 'joinedAt', align: 'center',width: '10%'},
-  { title: '최근 로그인', key: 'lastLogin', align: 'center',width: '10%'},
-  { title: '상태', key: 'status', align: 'center',width: '5%'},
-  { title: '사용량 (MB)', key: 'usage',align: 'center', width: '7%'},
+const headers: VDataTableHeader[] = [
+  { title: '회원명', key: 'name', align: 'center', width: '10%' },
+  { title: 'ID', key: 'id', align: 'center', width: '10%' },
+  { title: '레벨', key: 'level', align: 'center', width: '5%' },
+  { title: '협력사', key: 'partner', align: 'center', width: '10%' },
+  { title: '가입일', key: 'joinedAt', align: 'center', width: '10%' },
+  { title: '최근 로그인', key: 'lastLogin', align: 'center', width: '10%' },
+  { title: '상태', key: 'status', align: 'center', width: '5%' },
+  { title: '사용량 (MB)', key: 'usage', align: 'center', width: '7%' },
   { title: '', key: 'actions', sortable: false, width: '3%' },
 ]
-
 </script>
+
+
 
 <template>
   <ClientOnly>
@@ -140,7 +155,7 @@ const headers: Header[] = [
       <AdminPageHeader>
         <template #left>
           <v-icon class="mr-2" color="primary">mdi-account</v-icon>
-          <h1 class="page-title">회원 관리</h1>
+          <h1 class="page-title">{{ route.meta.title }}</h1>
           <v-tooltip
             location="right"
             offset="10"
@@ -187,7 +202,7 @@ const headers: Header[] = [
             :height="750"
           >
             <!-- 헤더 -->
-            <template #header="{ props }">
+            <template #headers>
               <tr>
                 <th
                   v-for="header in headers"
@@ -348,31 +363,49 @@ const headers: Header[] = [
 
         <v-card-text>
           <v-form ref="editFormRef">
-            <!-- 텍스트 (읽기 전용) -->
-            <v-text-field v-model="editForm.username" label="회원 아이디" readonly />
-            <v-text-field v-model="editForm.loginCount" label="로그인 수" readonly />
-            <v-text-field v-model="editForm.joinedAt" label="회원 가입일" readonly />
-            <v-text-field v-model="editForm.lastLogin" label="마지막 로그인" readonly />
+            <v-row dense>
+            <!-- 읽기 전용 필드 -->
+            <v-col cols="6">
+              <v-text-field v-model="editForm.username" label="회원 아이디" readonly />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field v-model="editForm.loginCount" label="로그인 수" readonly />
+            </v-col>
 
-            <!-- 수정 가능 -->
-            <v-text-field v-model="editForm.name" label="회원명" :rules="[rules.required]" />
-            <v-text-field v-model="editForm.email" label="이메일" :rules="[rules.required, rules.email]" />
-            <v-text-field v-model="editForm.partner" label="협력사" />
+            <v-col cols="6">
+              <v-text-field v-model="editForm.joinedAt" label="회원 가입일" readonly />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field v-model="editForm.lastLogin" label="마지막 로그인" readonly />
+            </v-col>
 
-            <!-- 드롭다운: 레벨 -->
-            <v-select
-              v-model="editForm.level"
-              label="회원 레벨"
-              :items="['사이트관리자', '미승인', '승인회원', '그룹관리자']"
-            />
+            <!-- 수정 가능한 필드 -->
+            <v-col cols="6">
+              <v-text-field v-model="editForm.name" label="회원명" :rules="[rules.required]" />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field v-model="editForm.email" label="이메일" :rules="[rules.required, rules.email]" />
+            </v-col>
 
-            <!-- 드롭다운: 상태 -->
-            <v-select
-              v-model="editForm.status"
-              label="회원 상태"
-              :items="['정상', '이용정지', '회원탈퇴']"
-            />
+            <v-col cols="6">
+              <v-text-field v-model="editForm.partner" label="협력사" />
+            </v-col>
+            <v-col cols="6">
+              <v-select
+                v-model="editForm.level"
+                label="회원 레벨"
+                :items="['사이트관리자', '미승인', '승인회원', '그룹관리자']"
+              />
+            </v-col>
 
+            <v-col cols="6">
+              <v-select
+                v-model="editForm.status"
+                label="회원 상태"
+                :items="['정상', '이용정지', '회원탈퇴']"
+              />
+            </v-col>
+          </v-row>
             <!-- 사용 중인 앱 -->
             <div class="mt-4">
               <label class="text-subtitle-2 font-weight-medium mb-1">사용 중인 앱</label>
@@ -492,5 +525,9 @@ const headers: Header[] = [
 .rounded-dialog .v-overlay__content {
   border-radius: 20px !important;
   overflow: hidden;
+}
+
+.rounded-dialog{
+  padding: 20px;
 }
 </style>

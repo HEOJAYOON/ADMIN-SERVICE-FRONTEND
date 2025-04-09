@@ -11,15 +11,19 @@ definePageMeta({
   icon: 'mdi-handshake-outline',
 })
 
-interface Partner {
-  type: '개인' | '단체'
+interface User {
   name: string
-  ceo: string
-  businessNo: string
-  contact: string
+  id: string
+  level: string
+  partner: string
+  joinedAt: string
+  lastLogin: string
+  status: string
+  usage: number
 }
+
 interface ApiResponse {
-  items: Partner[]
+  items: User[]
   total: number
 }
 interface Header {
@@ -47,8 +51,8 @@ const total = computed(() => data.value?.total ?? 0)
 
 const showDialog = ref(false)
 const formRef = ref()
-const partnerForm = ref({
-  partnername: '',
+const userForm = ref({
+  username: '',
   name: '',
   email: '',
   password: '',
@@ -58,7 +62,7 @@ const partnerForm = ref({
 const rules = {
   required: (v: string) => !!v || '필수 입력입니다.',
   email: (v: string) => /.+@.+\..+/.test(v) || '올바른 이메일 형식이어야 합니다.',
-  passwordMatch: () => partnerForm.value.password === partnerForm.value.confirmPassword || '비밀번호가 일치하지 않습니다.',
+  passwordMatch: () => userForm.value.password === userForm.value.confirmPassword || '비밀번호가 일치하지 않습니다.',
 }
 
 function submitForm() {
@@ -80,22 +84,34 @@ function submitForm() {
 
 const editDialog = ref(false)
 
+const editForm = ref({
+  username: 'user123',
+  name: '홍길동',
+  email: 'gildong@example.com',
+  partner: '협력사1',
+  level: '승인회원',
+  status: '정상',
+  loginCount: 87,
+  joinedAt: '2023-12-01',
+  lastLogin: '2024-04-08 12:34',
+  apps: ['문서함', '파일공유', '메시지']
+})
 
-// function openEditDialog(item: User) {
-//   editPartnerForm.value = {
-//     partnername: item.id,
-//     name: item.name,
-//     email: item.email || '',
-//     partner: item.partner || '',
-//     level: item.level || '',
-//     status: item.status || '',
-//     loginCount: item.loginCount || 0,
-//     joinedAt: dayjs(item.joinedAt).format('YYYY-MM-DD'),
-//     lastLogin: dayjs(item.lastLogin).format('YYYY-MM-DD HH:mm'),
-//     apps: item.apps || []
-//   }
-//   editDialog.value = true
-// }
+function openEditDialog(item: User) {
+  editForm.value = {
+    username: item.id,
+    name: item.name,
+    email: item.email || '',
+    partner: item.partner || '',
+    level: item.level || '',
+    status: item.status || '',
+    loginCount: item.loginCount || 0,
+    joinedAt: dayjs(item.joinedAt).format('YYYY-MM-DD'),
+    lastLogin: dayjs(item.lastLogin).format('YYYY-MM-DD HH:mm'),
+    apps: item.apps || []
+  }
+  editDialog.value = true
+}
 
 
 function submitEdit() {
@@ -105,12 +121,15 @@ function submitEdit() {
 
 
 const headers: Header[] = [
-  { title: '구분', key: 'type', align: 'center', width: '10%' },
-  { title: '협력사명', key: 'name', align: 'center', width: '20%' },
-  { title: '대표자', key: 'ceo', align: 'center', width: '15%' },
-  { title: '사업자 등록번호', key: 'businessNo', align: 'center', width: '25%' },
-  { title: '연락처', key: 'contact', align: 'center', width: '20%' },
-  { title: '', key: 'actions', sortable: false, width: '10%' },
+  { title: '회원명', key: 'name', align: 'center', width: '10%'},
+  { title: 'ID', key: 'id', align: 'center',width: '10%'},
+  { title: '레벨', key: 'level', align: 'center',width: '5%'},
+  { title: '협력사', key: 'partner', align: 'center',width: '10%'},
+  { title: '가입일', key: 'joinedAt', align: 'center',width: '10%'},
+  { title: '최근 로그인', key: 'lastLogin', align: 'center',width: '10%'},
+  { title: '상태', key: 'status', align: 'center',width: '5%'},
+  { title: '사용량 (MB)', key: 'usage',align: 'center', width: '7%'},
+  { title: '', key: 'actions', sortable: false, width: '3%' },
 ]
 
 </script>
@@ -120,8 +139,8 @@ const headers: Header[] = [
     <div class="page-section">
       <AdminPageHeader>
         <template #left>
-          <v-icon class="mr-2" color="primary">mdi-account</v-icon>
-          <h1 class="page-title">회원 관리</h1>
+          <v-icon class="mr-2" color="primary">mdi-handshake-outline</v-icon>
+          <h1 class="page-title">협력사 관리</h1>
           <v-tooltip
             location="right"
             offset="10"
@@ -180,21 +199,70 @@ const headers: Header[] = [
               </tr>
             </template>
 
-            <template #item.type="{ item }">
-  {{ item.type }}
-</template>
-<template #item.name="{ item }">
-  {{ item.name }}
-</template>
-<template #item.ceo="{ item }">
-  {{ item.ceo }}
-</template>
-<template #item.businessNo="{ item }">
-  {{ item.businessNo }}
-</template>
-<template #item.contact="{ item }">
-  {{ item.contact }}
-</template>
+            <!-- 회원명 -->
+            <template #item.name="{ item }">
+              {{ item.name }}
+            </template>
+
+            <!-- ID -->
+            <template #item.id="{ item }">
+              {{ item.id }}
+            </template>
+
+            <!-- 레벨 -->
+            <template #item.level="{ item }">
+              <v-chip
+                :color="item.level === '관리자' ? 'red' : item.level === '미승인' ? 'grey' : 'blue'"
+                dark
+                small
+              >
+                {{ item.level }}
+              </v-chip>
+            </template>
+
+            <!-- 협력사 -->
+            <template #item.partner="{ item }">
+              {{ item.partner }}
+            </template>
+
+            <!-- 가입일 -->
+            <template #item.joinedAt="{ item }">
+              {{ dayjs(item.joinedAt).format('YYYY-MM-DD') }}
+            </template>
+
+            <!-- 최근 로그인 -->
+            <template #item.lastLogin="{ item }">
+              {{ dayjs(item.lastLogin).format('YYYY-MM-DD HH:mm') }}
+            </template>
+
+            <!-- 상태 -->
+            <template #item.status="{ item }">
+              <v-chip
+                :color="item.status === '정상' ? 'green' : 'orange'"
+                dark
+                small
+              >
+                {{ item.status }}
+              </v-chip>
+            </template>
+
+            <!-- 사용량 -->
+            <template #item.usage="{ item }">
+              {{ item.usage }}
+            </template>
+
+            <!-- 정보변경 (연필 아이콘) -->
+            <template #item.actions="{ item }">
+              <v-btn
+                icon
+                size="small"
+                variant="text"
+                class="edit-icon"
+                @click="openEditDialog(item)"
+              >
+                <v-icon>mdi-pencil-outline</v-icon>
+              </v-btn>
+            </template>
           </v-data-table>
         </div>
 
